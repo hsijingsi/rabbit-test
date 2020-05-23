@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd 
+        http://www.springframework.org/schema/context 
+        https://www.springframework.org/schema/context/spring-context.xsd
+         http://www.springframework.org/schema/rabbit
+         http://www.springframework.org/schema/rabbit/spring-rabbit.xsd">
+<!--    <context:component-scan base-package="com.majortom" />-->
+    <!--扫描配置文件-->
+    <context:property-placeholder location="classpath:rabbitmq.properties"/>
+    <!--连接工厂-->
+    <rabbit:connection-factory id="connectionFactory"
+                               host="${rabbit.host}" port="${rabbit.post}"
+                               username="${rabbit.userName}" password="${rabbit.password}"
+                               virtual-host="${rabbit.virtualHost}"/>
+    <!--创建模板-->
+<!--    <rabbit:template id="rabbitTemplate" connection-factory="connectionFactory" exchange="fanoutExchange"/>-->
+<!--        <rabbit:template id="rabbitTemplate" connection-factory="connectionFactory" exchange="directExchange"/>-->
+        <rabbit:template id="rabbitTemplate" connection-factory="connectionFactory" exchange="topicExchange"/>
+
+    <!--声明队列-->
+<!--    <rabbit:queue name="test-fanout-queue1"  auto-declare="true"/>-->
+<!--        <rabbit:queue name="test-direct-queue1"  auto-declare="true"/>-->
+        <rabbit:queue name="test-topic-queue1"  auto-declare="true"/>
+    <!--定义管理-->
+    <rabbit:admin connection-factory="connectionFactory"/>
+    <!--定义扇形交换机的监听  绑定队列，消费者与对应的方法 -->
+<!--    <rabbit:listener-container connection-factory="connectionFactory">-->
+<!--        <rabbit:listener ref="Recv" method="RecvFanoutListen1" queue-names="test-fanout-queue1"/>-->
+<!--    </rabbit:listener-container>-->
+
+    <!--定义直连交换机的监听  绑定队列，消费者与对应的方法 -->
+<!--    <rabbit:listener-container connection-factory="connectionFactory">-->
+<!--        <rabbit:listener ref="Recv" method="RecvDirectListen1" queue-names="test-direct-queue1"/>-->
+<!--    </rabbit:listener-container>-->
+
+    <!--定义topic交换机的监听  绑定队列，消费者与对应的方法 -->
+        <rabbit:listener-container connection-factory="connectionFactory">
+        <rabbit:listener ref="Recv" method="RecvTopicListen1" queue-names="test-topic-queue1"/>
+    </rabbit:listener-container>
+    <!--注入消费者-->
+    <bean id="Recv" class="com.majortom.Recv"/>
+</beans>

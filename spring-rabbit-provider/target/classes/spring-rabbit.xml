@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd 
+        http://www.springframework.org/schema/context 
+        https://www.springframework.org/schema/context/spring-context.xsd
+         http://www.springframework.org/schema/rabbit
+         http://www.springframework.org/schema/rabbit/spring-rabbit.xsd">
+
+    <!--扫描配置文件-->
+    <context:property-placeholder location="classpath:rabbitmq.properties"/>
+    <!--连接工厂-->
+    <rabbit:connection-factory id="connectionFactory"
+                               host="${rabbit.host}" port="${rabbit.post}"
+                               username="${rabbit.userName}" password="${rabbit.password}"
+                               virtual-host="${rabbit.virtualHost}"/>
+    <!--创建模板-->
+<!--    <rabbit:template id="rabbitTemplate" connection-factory="connectionFactory" exchange="fanoutExchange"/>-->
+<!--    <rabbit:template id="rabbitTemplate" connection-factory="connectionFactory" exchange="directExchange"/>-->
+    <rabbit:template id="rabbitTemplate" connection-factory="connectionFactory" exchange="topicExchange"/>
+    <!--声明队列-->
+<!--    <rabbit:queue name="test-fanout-queue1"  auto-declare="true"/>-->
+<!--    <rabbit:queue name="test-fanout-queue2"  auto-declare="true"/>-->
+<!--    <rabbit:queue name="test-direct-queue1"  auto-declare="true"/>-->
+<!--    <rabbit:queue name="test-direct-queue2"  auto-declare="true"/>-->
+    <rabbit:queue name="test-topic-queue1"  auto-declare="true"/>
+    <rabbit:queue name="test-topic-queue2"  auto-declare="true"/>
+    <!--定义管理-->
+    <rabbit:admin connection-factory="connectionFactory"/>
+    <!--声明扇形交换机  完成交换机与队列的绑定-->
+<!--    <rabbit:fanout-exchange name="fanoutExchange" auto-declare="true">-->
+<!--        <rabbit:bindings>-->
+<!--            <rabbit:binding queue="test-fanout-queue1" />-->
+<!--            <rabbit:binding queue="test-fanout-queue2" />-->
+<!--        </rabbit:bindings>-->
+<!--    </rabbit:fanout-exchange>-->
+    <!--直连交换机-->
+<!--    <rabbit:direct-exchange name="directExchange" auto-declare="true">-->
+<!--        <rabbit:bindings>-->
+<!--            <rabbit:binding queue="test-direct-queue1" key="delete"/>-->
+<!--            <rabbit:binding queue="test-direct-queue2" key="insert"/>-->
+<!--            <rabbit:binding queue="test-direct-queue2" key="delete"/>-->
+<!--        </rabbit:bindings>-->
+<!--    </rabbit:direct-exchange>-->
+    <!--topic-->
+    <rabbit:topic-exchange name="topicExchange" auto-declare="true">
+        <rabbit:bindings>
+            <rabbit:binding pattern="topic.*" queue="test-topic-queue1"/>
+            <rabbit:binding pattern="a.b" queue="test-topic-queue2"/>
+            <rabbit:binding pattern="#" queue="test-topic-queue2"/>
+        </rabbit:bindings>
+    </rabbit:topic-exchange>
+</beans>
