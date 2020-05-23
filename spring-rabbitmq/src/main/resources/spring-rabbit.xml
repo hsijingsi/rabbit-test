@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd 
+        http://www.springframework.org/schema/context 
+        https://www.springframework.org/schema/context/spring-context.xsd
+         http://www.springframework.org/schema/rabbit
+         http://www.springframework.org/schema/rabbit/spring-rabbit.xsd">
+
+    <!--扫描配置文件-->
+    <context:property-placeholder location="classpath:rabbitmq.properties"/>
+    <!--连接工厂-->
+    <rabbit:connection-factory id="connectionFactory"
+                               host="${rabbit.host}" port="${rabbit.post}"
+                               username="${rabbit.userName}" password="${rabbit.password}"
+                               virtual-host="${rabbit.virtualHost}"/>
+    <!--创建模板-->
+    <rabbit:template id="rabbitTemplate" connection-factory="connectionFactory" exchange="fanoutExchange"/>
+    <!--声明队列-->
+    <rabbit:queue name="queue"  auto-declare="true"/>
+    <!--定义管理-->
+    <rabbit:admin connection-factory="connectionFactory"/>
+    <!--声明交换机  完成交换机与队列的绑定-->
+    <rabbit:fanout-exchange name="fanoutExchange" auto-declare="true">
+        <rabbit:bindings>
+            <rabbit:binding queue="queue" />
+        </rabbit:bindings>
+    </rabbit:fanout-exchange>
+    <!--定义监听  绑定队列，消费者与对应的方法 -->
+    <rabbit:listener-container connection-factory="connectionFactory">
+        <rabbit:listener ref="foo" method="listener" queue-names="queue"/>
+    </rabbit:listener-container>
+    <!--注入消费者-->
+    <bean id="foo" class="com.majortom.Recv"/>
+</beans>
